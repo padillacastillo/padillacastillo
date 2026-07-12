@@ -35,12 +35,12 @@
         <div class="entry-header">
           <p class="entry-title">Cloud Resume Website — padillacastillo.com</p>
         </div>
-        <p class="entry-sub">AWS · Terraform · GitHub Actions</p>
+        <p class="entry-sub">AWS · Terraform</p>
         <ul>
           <li>Designed and deployed a serverless personal resume site and landing page on AWS to learn cloud infrastructure hands-on, linking out to GitHub and other professional profiles.</li>
-          <li>Hosted static HTML/CSS/JS in a private S3 bucket, fronted by CloudFront for global CDN caching and TLS termination, with a free ACM certificate securing the custom domain and Route 53 handling DNS.</li>
-          <li>Built a serverless visitor counter using API Gateway, Lambda (Python), and DynamoDB to track and increment site visits in real time.</li>
-          <li>Defined all infrastructure as code with Terraform and automated testing and deployment through a GitHub Actions CI/CD pipeline; full architecture write-up documented on GitHub.</li>
+          <li>Hosted static HTML/CSS/JS in a private S3 bucket, fronted by CloudFront for global CDN caching and TLS termination, with a free ACM certificate securing the custom domain and a new Route 53 hosted zone handling DNS, including migrating the domain's live Google Workspace email (MX, SPF, DKIM, DMARC) over from the previous registrar without an outage.</li>
+          <li>Built a serverless, unique-visitor counter using API Gateway, Lambda (Python), and DynamoDB, deduping repeat visits with a keyed HMAC of the source IP so the count reflects real traffic and no raw IP address is ever stored.</li>
+          <li>Added a Lambda-backed contact form (separate API Gateway + SES) with honeypot filtering and API throttling to block spam while keeping the contact email out of the page's source; defined all infrastructure as Terraform code, with a full architecture write-up documented on GitHub.</li>
         </ul>
       </div>
 
@@ -95,7 +95,7 @@
 
       <div class="entry">
         <div class="entry-header">
-          <p class="entry-title">Owner / Operator — CPC Mobile Notary, LA &amp; OC, CA</p>
+          <p class="entry-title">Owner / Operator — CPC Mobile Notary, L.A. Metro Area</p>
           <p class="entry-meta">February 2026 – Present</p>
         </div>
         <p class="entry-sub">Self-Employed</p>

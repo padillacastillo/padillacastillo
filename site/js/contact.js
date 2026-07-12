@@ -1,6 +1,4 @@
-// TODO: replace with the real API Gateway invoke URL once `terraform apply` outputs it
-// (see terraform/contact_form.tf output "contact_form_api_url")
-const CONTACT_API_URL = "https://REPLACE-ME.execute-api.us-east-1.amazonaws.com/contact";
+const CONTACT_API_URL = "https://rc8s3wfo3i.execute-api.us-east-1.amazonaws.com/contact";
 
 const form = document.getElementById("contact-form");
 const submitBtn = document.getElementById("submit-btn");

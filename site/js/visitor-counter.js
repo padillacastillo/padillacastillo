@@ -1,6 +1,4 @@
-// TODO: replace with the real API Gateway invoke URL once `terraform apply` outputs it
-// (see terraform/visitor_counter.tf output "visitor_counter_api_url")
-const VISITOR_COUNTER_API_URL = "https://REPLACE-ME.execute-api.us-east-1.amazonaws.com/count";
+const VISITOR_COUNTER_API_URL = "https://8tg1s8r8f0.execute-api.us-east-1.amazonaws.com/count";
 
 const counterEl = document.getElementById("visitor-count");
 
