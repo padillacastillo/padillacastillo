@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cristian Padilla Castillo</title>
+  <meta name="description" content="Cristian Padilla Castillo — Computer Science student. Cloud Resume Challenge and real-world project work.">
+  <meta property="og:title" content="Cristian Padilla Castillo">
+  <meta property="og:description" content="Computer Science student.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://padillacastillo.com">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="wrap">
+    <section>
+      <p class="eyebrow">$ whoami</p>
+      <h1>Cristian Padilla Castillo</h1>
+      <p class="tagline">Computer Science student</p>
+      <p class="bio">I'm a CS student at CSULB learning cloud infrastructure by building real, deployed projects — from this serverless resume site to a production booking platform for a small business I run.</p>
+    </section>
+
+    <nav class="socials" aria-label="Social links">
+      <a href="https://github.com/padillacastillo" aria-label="GitHub" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58 0-.29-.01-1.04-.02-2.04-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.21.08 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.8 5.63-5.48 5.92.43.37.81 1.1.81 2.22 0 1.6-.02 2.89-.02 3.29 0 .32.22.7.83.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      </a>
+      <a href="contact/" aria-label="Contact">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4h20a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm1.4 2L12 12.5 20.6 6H3.4zM3 8.24V18h18V8.24l-8.65 6.74a1 1 0 0 1-1.2 0L3 8.24z"/></svg>
+      </a>
+      <a href="resume/" aria-label="Resume">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm0 2.5L18.5 9H14V4.5zM8 13h8v1.5H8V13zm0 3h8v1.5H8V16zm0-6h4v1.5H8V10z"/></svg>
+      </a>
+    </nav>
+
+    <section>
+      <h2>Projects</h2>
+      <div class="projects">
+        <a class="project-card" href="https://github.com/padillacastillo/padillacastillo" target="_blank" rel="noopener">
+          <h3>Cloud Resume Website</h3>
+          <p>This site — a serverless resume and landing page with a Lambda-backed visitor counter, all provisioned with Terraform and deployed through GitHub Actions.</p>
+          <div class="tags"><span>AWS</span><span>Terraform</span><span>GitHub Actions</span></div>
+        </a>
+        <a class="project-card" href="https://cpcmobilenotary.com" target="_blank" rel="noopener">
+          <h3>CPC Mobile Notary Booking Platform</h3>
+          <p>A live booking system for a self-owned mobile notary business — S3/CloudFront front end, Lambda + DynamoDB handling submissions, SES/SNS for real-time notifications.</p>
+          <div class="tags"><span>AWS</span><span>Terraform</span><span>GitHub Actions</span></div>
+        </a>
+      </div>
+    </section>
+
+    <footer>
+      <p>Built with Terraform · Hosted on AWS S3 + CloudFront · Source on <a href="https://github.com/padillacastillo/padillacastillo" target="_blank" rel="noopener">GitHub</a></p>
+      <p>Unique visitors: <span id="visitor-count">…</span></p>
+      <p>&copy; 2026 Cristian Padilla Castillo</p>
+    </footer>
+  </main>
+  <script src="js/visitor-counter.js"></script>
+</body>
+</html>

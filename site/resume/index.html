@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Resume — Cristian Padilla Castillo</title>
+  <meta name="description" content="Resume for Cristian Padilla Castillo — Computer Science student, cloud projects, and professional experience.">
+  <meta property="og:title" content="Resume — Cristian Padilla Castillo">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <main class="wrap">
+    <a class="back-link" href="../">&larr; back</a>
+
+    <div class="resume-header">
+      <div>
+        <h1>Cristian Padilla Castillo</h1>
+        <div class="resume-contact">
+          <span>Carson, CA</span>
+          <a href="../contact/">Contact</a>
+        </div>
+      </div>
+    </div>
+
+    <section class="resume-section">
+      <h2>Projects</h2>
+
+      <div class="entry">
+        <div class="entry-header">
+          <p class="entry-title">Cloud Resume Website — padillacastillo.com</p>
+        </div>
+        <p class="entry-sub">AWS · Terraform · GitHub Actions</p>
+        <ul>
+          <li>Designed and deployed a serverless personal resume site and landing page on AWS to learn cloud infrastructure hands-on, linking out to GitHub and other professional profiles.</li>
+          <li>Hosted static HTML/CSS/JS in a private S3 bucket, fronted by CloudFront for global CDN caching and TLS termination, with a free ACM certificate securing the custom domain and Route 53 handling DNS.</li>
+          <li>Built a serverless visitor counter using API Gateway, Lambda (Python), and DynamoDB to track and increment site visits in real time.</li>
+          <li>Defined all infrastructure as code with Terraform and automated testing and deployment through a GitHub Actions CI/CD pipeline; full architecture write-up documented on GitHub.</li>
+        </ul>
+      </div>
+
+      <div class="entry">
+        <div class="entry-header">
+          <p class="entry-title">CPC Mobile Notary Booking Platform — cpcmobilenotary.com</p>
+        </div>
+        <p class="entry-sub">AWS · Terraform · GitHub Actions</p>
+        <ul>
+          <li>Architected and deployed a booking request system on AWS for a live, self-owned mobile notary business, applying the same cloud patterns learned from the resume project to a real-world production use case.</li>
+          <li>Hosted the front-end booking form on S3 and CloudFront, with API Gateway and Lambda (Python) handling form submissions, validating input, and writing records to DynamoDB.</li>
+          <li>Configured SES/SNS to send real-time email notifications on new booking requests.</li>
+          <li>Provisioned all infrastructure with Terraform and deployed via GitHub Actions using OIDC authentication for secure, keyless CI/CD.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="resume-section">
+      <h2>Experience</h2>
+
+      <div class="entry">
+        <div class="entry-header">
+          <p class="entry-title">Medical Legal Assistant — Confidential, Beverly Hills, CA</p>
+          <p class="entry-meta">July 2026 – Present</p>
+        </div>
+        <p class="entry-sub">Full-Time</p>
+        <ul>
+          <li>Manage the day-to-day business and administrative operations for a physician-led medical-legal expert witness practice, allowing the doctor to focus fully on case review and testimony.</li>
+          <li>Handle client intake for new expert witness engagements, gathering case details and coordinating with attorneys and law firms to open and track files.</li>
+          <li>Prepare and manage invoicing and billing for expert witness services, tracking payments and following up on outstanding balances.</li>
+          <li>Organize, index, and maintain medical records and case files, ensuring materials are complete and readily accessible for the doctor's review and reports.</li>
+          <li>Draft correspondence and coordinate scheduling for depositions, records requests, and case deadlines.</li>
+        </ul>
+      </div>
+
+      <div class="entry">
+        <div class="entry-header">
+          <p class="entry-title">Legal Assistant — Confidential, El Segundo, CA</p>
+          <p class="entry-meta">December 2024 – July 2026</p>
+        </div>
+        <p class="entry-sub">Full-Time</p>
+        <ul>
+          <li>Reviewed and analyzed legal documents for accuracy, completeness, and discrepancies, flagging issues before submission.</li>
+          <li>Maintained detailed records of case activity, prepared written correspondence, and tracked deadlines and filing requirements.</li>
+          <li>Coordinated daily with medical providers, opposing counsel, clients, and staff by phone, email, and in person to keep cases moving.</li>
+          <li>Handled confidential and privileged information with discretion and good judgment.</li>
+          <li>Researched legal procedures, supported discovery, and ensured compliance with court rules and applicable regulations.</li>
+          <li>Assisted with discovery by preparing and tracking requests for production, form interrogatories, and subpoenas for records; organized and indexed responses for attorney review.</li>
+          <li>Supported pre-litigation case management, including gathering medical records, coordinating with lien providers, and maintaining case timelines from intake through demand.</li>
+        </ul>
+      </div>
+
+      <div class="entry">
+        <div class="entry-header">
+          <p class="entry-title">Owner / Operator — CPC Mobile Notary, LA &amp; OC, CA</p>
+          <p class="entry-meta">February 2026 – Present</p>
+        </div>
+        <p class="entry-sub">Self-Employed</p>
+        <ul>
+          <li>Founded and independently operate a mobile notary and loan signing business, managing client acquisition, scheduling, compliance, and financial operations across Los Angeles and Orange Counties.</li>
+          <li>Designed and deployed a custom AWS-based booking and intake platform (see Projects) to automate client requests and streamline day-to-day operations.</li>
+          <li>Manage relationships with signing platforms, lenders, and escrow partners, coordinating appointments end-to-end and ensuring timely, accurate processing.</li>
+          <li>Own full business operations including invoicing, bookkeeping (QuickBooks Online), and compliance recordkeeping under California notary law.</li>
+        </ul>
+      </div>
+
+    </section>
+
+    <section class="resume-section">
+      <h2>Education</h2>
+      <div class="entry">
+        <div class="entry-header">
+          <p class="entry-title">Bachelor of Science, Computer Science — California State University, Long Beach</p>
+          <p class="entry-meta">2022 – Present</p>
+        </div>
+        <p class="entry-sub">In Progress</p>
+        <ul>
+          <li>Coursework in programming, computer applications, and Python; comfortable learning new software and systems quickly.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="resume-section">
+      <h2>Licenses &amp; Certifications</h2>
+      <div class="entry">
+        <ul>
+          <li>Valid California Class C driver's license with a clean driving record.</li>
+          <li>Active California Notary Public commission.</li>
+          <li>Notary2Pro graduate, ID 23892.</li>
+          <li>NNA Certified Signing Agent — National Notary Association.</li>
+          <li>Google Technical Support Fundamentals — Google / Coursera.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="resume-section">
+      <h2>Languages</h2>
+      <div class="entry">
+        <ul>
+          <li>Fluent Spanish speaking and reading, with limited writing.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="resume-section">
+      <h2>Skills &amp; Qualifications</h2>
+      <div class="entry">
+        <ul>
+          <li>Legal document review and analysis — identifying discrepancies, missing information, and compliance issues before execution.</li>
+          <li>Professional client communication — explaining complex procedures clearly and maintaining composure in high-stakes signings.</li>
+          <li>Familiarity with California notarization law, notary journal requirements, and proper seal and certificate procedures.</li>
+          <li>Strong organizational skills — managing multiple signing appointments, maintaining accurate files, and coordinating with vendors, service providers, and business partners.</li>
+          <li>Cloud &amp; infrastructure basics — AWS (S3, CloudFront, Lambda, API Gateway, DynamoDB, Route 53, ACM), Terraform, and GitHub Actions CI/CD, applied through personal and business projects.</li>
+          <li>Microsoft Office proficiency — Word (template and form design), Excel (macros, AutoSort automation, case tracking spreadsheets); daily use in legal environment.</li>
+          <li>Google Workspace — Gmail, Drive, Docs, Sheets, and Calendar for scheduling, document management, and team coordination.</li>
+          <li>QuickBooks Online — invoicing, expense tracking, and financial recordkeeping for self-employed business operations.</li>
+          <li>Typing speed of 60+ WPM with 99% accuracy.</li>
+          <li>Calm and professional under pressure — suited to high-value real estate closings and sensitive financial signings.</li>
+          <li>Mobile across Southern California with a clean driving record; experienced with independent scheduling and route management.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

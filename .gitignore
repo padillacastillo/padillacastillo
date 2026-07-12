@@ -3,6 +3,11 @@
 *.tfstate
 *.tfstate.*
 !.terraform.lock.hcl
+terraform/build/
 
 # Local env files
+
 .env
+
+TODO.md
+
