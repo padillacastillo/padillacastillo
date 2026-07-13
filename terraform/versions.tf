@@ -14,6 +14,17 @@ terraform {
       source  = "hashicorp/random"
       version = "~> 3.6"
     }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
+  }
+
+  backend "s3" {
+    bucket       = "padillacastillo-tfstate"
+    key          = "padillacastillo.tfstate"
+    region       = "us-east-1"
+    use_lockfile = true
   }
 }
 

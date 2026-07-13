@@ -173,3 +173,8 @@ output "site_bucket_name" {
   description = "Bucket to sync site/ into, e.g.: aws s3 sync site/ s3://<this>/"
   value       = aws_s3_bucket.site.bucket
 }
+
+output "cloudfront_distribution_id" {
+  description = "Needed to invalidate the cache after syncing new site files, e.g.: aws cloudfront create-invalidation --distribution-id <this> --paths '/*'"
+  value       = aws_cloudfront_distribution.site.id
+}
