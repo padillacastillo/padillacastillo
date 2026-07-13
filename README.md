@@ -19,7 +19,7 @@ flowchart TD
     Browser -->|HTTPS| CFAPIGW["API Gateway<br/>HTTP API"]
     CFAPIGW --> CFLAM["Lambda<br/>contact_form"]
     CFLAM --> SES["SES"]
-    SES -->|email| Inbox(["cristian@padillacastillo.com"])
+    SES -->|email| Inbox(["Inbox"])
 
     GHA["GitHub Actions"] -->|deploy on push| TF["Terraform"]
     TF -.->|provisions| CF
@@ -58,29 +58,77 @@ flowchart TD
 
 ## Why I made these choices
 
-**Why HTML instead of just uploading the PDF resume?**
-The challenge is specifically about building a website, not hosting a file, so the resume became an actual page.
+Grouped to match the diagram above. Click a question to expand.
 
-**Why keep the S3 bucket private instead of turning on static website hosting?**
-If the bucket is public, anyone can bypass CloudFront and access S3 directly, with no caching and no TLS. Origin Access Control lets CloudFront talk to a private bucket instead, so S3 itself is never exposed to the internet.
+### 🔵 Delivery
 
-**Why GitHub Actions with OIDC instead of storing an AWS key in repo secrets?**
-A key stored in GitHub secrets does not expire on its own, so if it ever leaks, it becomes a standing problem. OIDC lets Actions assume a role for the duration of a single run, which means there is no long-lived secret to leak in the first place.
+<details>
+<summary>Why keep the S3 bucket private instead of turning on static website hosting?</summary>
 
-**Why does `.gitignore` skip the state files but keep the lock file?**
-State can contain details I do not want sitting in git history, and it will move to a remote backend eventually. The lock file is different: it pins exact provider versions, so running `terraform init` on another machine, or in CI, produces the same build I tested locally.
+- A public bucket lets anyone bypass CloudFront and hit S3 directly — no caching, no TLS.
+- Origin Access Control lets CloudFront read from a private bucket instead, so S3 is never exposed to the internet.
+</details>
 
-**Why a Lambda-backed contact form instead of a plain `mailto:` link?**
-A raw `mailto:` link puts my email address in the page's HTML in plain text, which is exactly what spam bots scrape for. Routing it through a form means the address never appears in the source at all — the visitor's browser only ever talks to an API Gateway URL. The Lambda also rejects anything that fills in a honeypot field (a form field that's hidden from real users but visible to bots that auto-fill everything), and the API Gateway route has a low throttle limit, so even a scripted flood gets capped before it reaches my inbox. It's also independent of the S3/CloudFront/Route 53 hosting work — SES only needs a single verified email address, not a verified domain, so it doesn't have to wait on Phase 2 to exist.
+### 🟢 Backend — visitor counter
 
-**Why count unique visitors instead of just incrementing on every page load?**
-A counter that bumps on every load mostly measures my own refreshes during testing, not real traffic. Deduping by visitor is a truer number, so the Lambda hashes each request's source IP and only increments the total the first time it sees that hash.
+<details>
+<summary>Why count unique visitors instead of just incrementing on every page load?</summary>
 
-**Why HMAC the IP instead of storing it directly, or just hashing it with SHA-256?**
-Storing raw IPs forever is more permanent exposure than I want sitting in a database for a public site, and a plain hash isn't actually protection: IPv4 only has about 4.3 billion possible addresses, so someone can precompute a hash for every single one and reverse any leaked hash in a lookup. Keying the hash with a secret (HMAC) — that only the Lambda knows, held in Secrets Manager, never in code or Terraform state — closes that off: without the key, the stored value can't be matched back to an IP. It still dedupes correctly, since the same IP always produces the same HMAC.
+- Incrementing on every load mostly measures my own refreshes while testing, not real traffic.
+- The Lambda hashes each request's source IP and only increments the total the first time it sees that hash.
+</details>
 
-**Why keep visitor records forever instead of expiring them with a TTL?**
-"Unique" is defined here as unique for the life of the site, not unique per day — a TTL would let the same person get re-counted after it expires, which isn't the number I'm after. Storage cost for a resume site's traffic is negligible either way.
+<details>
+<summary>Why HMAC the IP instead of storing it directly, or just hashing it with SHA-256?</summary>
+
+- Storing raw IPs forever is more permanent exposure than a public site's visitor count needs.
+- A plain hash isn't real protection: IPv4 has only ~4.3 billion addresses, so an attacker can precompute a hash for every one and reverse any leaked hash in a lookup.
+- HMAC keys the hash with a secret — held in Secrets Manager, never in code or Terraform state — so a leaked value can't be matched back to an IP without that key.
+- The same IP still always produces the same HMAC, so dedup still works correctly.
+</details>
+
+<details>
+<summary>Why keep visitor records forever instead of expiring them with a TTL?</summary>
+
+- "Unique" here means unique for the life of the site, not per day — a TTL would let the same person get re-counted once it expires.
+- Storage cost for a resume site's traffic is negligible either way.
+</details>
+
+### 🟢 Backend — contact form
+
+<details>
+<summary>Why a Lambda-backed contact form instead of a plain <code>mailto:</code> link?</summary>
+
+- A `mailto:` link puts my email address in the page's HTML in plain text — exactly what spam bots scrape for.
+- Routing through a form means the address never appears in the source; the browser only ever talks to an API Gateway URL.
+- The Lambda rejects anything that fills in a honeypot field (hidden from real users, visible to bots that auto-fill everything).
+- The API Gateway route has a low throttle limit, so even a scripted flood gets capped before it reaches my inbox.
+- It's independent of the S3/CloudFront/Route 53 hosting work — SES only needs a verified email address, not a verified domain — so it didn't have to wait on that phase to exist.
+</details>
+
+### 🟣 Pipeline
+
+<details>
+<summary>Why GitHub Actions with OIDC instead of storing an AWS key in repo secrets?</summary>
+
+- A key stored in GitHub secrets doesn't expire on its own — if it ever leaks, it's a standing problem.
+- OIDC lets Actions assume a role for the duration of a single run, so there's no long-lived secret to leak in the first place.
+</details>
+
+<details>
+<summary>Why does <code>.gitignore</code> skip the state files but keep the lock file?</summary>
+
+- State can contain details I don't want sitting in git history, and it'll move to a remote backend eventually.
+- The lock file pins exact provider versions, so `terraform init` on another machine, or in CI, produces the same build I tested locally.
+</details>
+
+### General
+
+<details>
+<summary>Why HTML instead of just uploading the PDF resume?</summary>
+
+- The challenge is specifically about building a website, not hosting a file, so the resume became an actual page.
+</details>
 
 
 ## Project structure
@@ -99,6 +147,3 @@ padillacastillo/
   terraform/              every AWS resource above, as code
   .github/workflows/      test.yml (PR checks), deploy.yml (push to main)
 ```
-
-## Status
-The landing, resume, and contact pages are written, along with the contact form's backend (Lambda + SES + API Gateway in `terraform/contact_form.tf`), the visitor counter's backend (Lambda + DynamoDB + Secrets Manager + API Gateway in `terraform/visitor_counter.tf`), and static hosting (S3 + CloudFront + ACM + a fresh Route 53 hosted zone in `terraform/hosting.tf` — the domain is registered at Squarespace, so DNS cuts over by pointing Squarespace at the new zone's name servers). None of it is deployed yet — no Terraform has been applied. See `TODO.md` for the working task list, including the exact steps left to apply and verify each piece, and the commit history for what's actually landed once it starts.
