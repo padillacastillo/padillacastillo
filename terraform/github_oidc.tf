@@ -48,21 +48,14 @@ resource "aws_iam_role_policy" "github_actions_deploy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid      = "TerraformState"
+        # Terraform's aws_s3_bucket resource reads/writes a long tail of
+        # sub-resources on refresh (ACLs, versioning, encryption, policy,
+        # public-access-block, ...) - scoping to discrete actions here turns
+        # into permission whack-a-mole, so this is scoped by bucket name
+        # instead, to every bucket this project owns (state + site).
+        Sid      = "SiteAndStateBuckets"
         Effect   = "Allow"
-        Action   = ["s3:GetObject", "s3:PutObject", "s3:ListBucket"]
-        Resource = [aws_s3_bucket.tfstate.arn, "${aws_s3_bucket.tfstate.arn}/*"]
-      },
-      {
-        Sid    = "SiteAndStateBuckets"
-        Effect = "Allow"
-        Action = [
-          "s3:CreateBucket", "s3:GetObject", "s3:PutObject", "s3:DeleteObject",
-          "s3:ListBucket", "s3:GetBucketPolicy", "s3:PutBucketPolicy",
-          "s3:GetBucketVersioning", "s3:PutBucketVersioning",
-          "s3:GetBucketPublicAccessBlock", "s3:PutBucketPublicAccessBlock",
-          "s3:GetEncryptionConfiguration", "s3:PutEncryptionConfiguration",
-        ]
+        Action   = "s3:*"
         Resource = ["arn:aws:s3:::padillacastillo-*", "arn:aws:s3:::padillacastillo-*/*"]
       },
       {
@@ -120,17 +113,42 @@ resource "aws_iam_role_policy" "github_actions_deploy" {
         Resource = "arn:aws:logs:*:*:log-group:/aws/lambda/padillacastillo-*"
       },
       {
+        # DescribeLogGroups is a list-style call that AWS doesn't let you
+        # scope down to a specific log group ARN, so it has to stay on "*" -
+        # it's read-only (just lists names/metadata), so low risk.
+        Sid      = "LogsList"
+        Effect   = "Allow"
+        Action   = "logs:DescribeLogGroups"
+        Resource = "*"
+      },
+      {
         # Only the two Lambda execution roles - deliberately excludes this
-        # role itself and the OIDC provider, so a compromised deploy run
-        # can't grant itself broader access.
+        # role itself, so a compromised deploy run can't grant itself
+        # broader access.
         Sid    = "LambdaExecutionRoles"
         Effect = "Allow"
         Action = [
           "iam:GetRole", "iam:CreateRole", "iam:DeleteRole", "iam:TagRole",
           "iam:PutRolePolicy", "iam:GetRolePolicy", "iam:DeleteRolePolicy",
-          "iam:ListRolePolicies", "iam:PassRole",
+          "iam:ListRolePolicies", "iam:ListAttachedRolePolicies",
+          "iam:ListRoleTags", "iam:PassRole",
         ]
         Resource = "arn:aws:iam::*:role/padillacastillo-*-lambda"
+      },
+      {
+        # This Terraform config also manages the OIDC provider itself, so
+        # the role needs to read/update it - scoped to OIDC-provider-only
+        # actions, never anything that could touch this role's own trust
+        # policy or permissions.
+        Sid    = "GithubOidcProvider"
+        Effect = "Allow"
+        Action = [
+          "iam:GetOpenIDConnectProvider", "iam:CreateOpenIDConnectProvider",
+          "iam:UpdateOpenIDConnectProviderThumbprint", "iam:TagOpenIDConnectProvider",
+          "iam:UntagOpenIDConnectProvider", "iam:ListOpenIDConnectProviders",
+          "iam:AddClientIDToOpenIDConnectProvider",
+        ]
+        Resource = "*"
       },
     ]
   })
