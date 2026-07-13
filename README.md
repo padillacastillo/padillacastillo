@@ -16,7 +16,7 @@ flowchart TD
     S3 --> RP["padillacastillo.com/resume<br/>resume page"]
     S3 --> CP["padillacastillo.com/contact<br/>contact page"]
 
-    Browser -->|HTTPS| CFAPIGW["API Gateway<br/>HTTP API"]
+    CP -->|form submit| CFAPIGW["API Gateway<br/>HTTP API"]
     CFAPIGW --> CFLAM["Lambda<br/>contact_form"]
     CFLAM --> SES["SES"]
     SES -->|email| Inbox(["Inbox"])

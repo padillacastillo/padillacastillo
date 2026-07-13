@@ -1,0 +1,45 @@
+name: deploy
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  id-token: write # required to assume the AWS role via OIDC
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.5"
+
+      - run: terraform init
+
+      - run: terraform apply -auto-approve
+
+      # Terraform owns the infra and the Lambda code (both zipped straight
+      # from lambda/*.py), but not the static site files - those are synced
+      # separately, then the CDN cache is invalidated so visitors don't keep
+      # getting stale HTML/CSS/JS from before this push.
+      - name: Sync site files to S3
+        run: |
+          aws s3 sync ../site/ "s3://$(terraform output -raw site_bucket_name)/" --delete
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "$(terraform output -raw cloudfront_distribution_id)" \
+            --paths '/*'
