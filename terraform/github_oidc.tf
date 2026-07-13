@@ -150,6 +150,19 @@ resource "aws_iam_role_policy" "github_actions_deploy" {
         ]
         Resource = "*"
       },
+      {
+        # This config also manages this very role, so refresh needs to read
+        # it - but only read. No Put/Create/Delete/Attach here, so a
+        # compromised deploy run still can't rewrite its own permissions or
+        # trust policy, only observe them.
+        Sid    = "SelfRoleReadOnly"
+        Effect = "Allow"
+        Action = [
+          "iam:GetRole", "iam:ListRolePolicies", "iam:GetRolePolicy",
+          "iam:ListAttachedRolePolicies", "iam:ListRoleTags",
+        ]
+        Resource = aws_iam_role.github_actions_deploy.arn
+      },
     ]
   })
 }
