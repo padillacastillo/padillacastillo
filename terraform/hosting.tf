@@ -63,14 +63,6 @@ resource "aws_cloudfront_origin_access_control" "site" {
   signing_protocol                  = "sigv4"
 }
 
-resource "aws_cloudfront_function" "url_rewrite" {
-  name    = "padillacastillo-url-rewrite"
-  runtime = "cloudfront-js-2.0"
-  comment = "Unused - kept defined so this apply only detaches it from the distribution; deleting it in the same apply that removes the association fails with FunctionInUse, since CloudFront hasn't finished deploying the detach yet. Safe to delete this resource and functions/url_rewrite.js in a follow-up apply once this one has gone out clean."
-  publish = true
-  code    = file("${path.module}/functions/url_rewrite.js")
-}
-
 resource "aws_cloudfront_distribution" "site" {
   enabled             = true
   is_ipv6_enabled     = true
