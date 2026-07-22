@@ -49,6 +49,22 @@
     white-space: pre-wrap;
   }
 
+  @keyframes screenFlicker {
+    0%   { opacity: 0; }
+    4%   { opacity: 1; }
+    6%   { opacity: 0.2; }
+    9%   { opacity: 1; }
+    12%  { opacity: 0.4; }
+    16%  { opacity: 1; }
+    35%  { opacity: 0.7; }
+    40%  { opacity: 1; }
+    100% { opacity: 1; }
+  }
+
+  #screen.boot-in {
+    animation: screenFlicker 1s ease-out;
+  }
+
   .prompt-line {
     display: flex;
     align-items: center;
@@ -88,21 +104,13 @@
   .label { color: var(--muted); }
   .dim { color: var(--error); }
 
-  #input-line {
-    display: flex;
-    gap: 8px;
-    align-items: center;
+  #live-line {
+    opacity: 0;
+    transition: opacity 0.4s ease;
   }
 
-  #cmd-input {
-    flex: 1;
-    background: transparent;
-    border: none;
-    outline: none;
-    color: var(--fg);
-    font-family: inherit;
-    font-size: 14.5px;
-    caret-color: transparent;
+  #live-line.visible {
+    opacity: 1;
   }
 
   .cursor {
@@ -121,33 +129,18 @@
     50% { opacity: 0; }
   }
 
-  @keyframes fadeIn {
-    from { opacity: 0; } to { opacity: 1; }
-  }
-
-  @keyframes screenFlicker {
-    0%   { opacity: 0; }
-    4%   { opacity: 1; }
-    6%   { opacity: 0.2; }
-    9%   { opacity: 1; }
-    12%  { opacity: 0.4; }
-    16%  { opacity: 1; }
-    35%  { opacity: 0.7; }
-    40%  { opacity: 1; }
-    100% { opacity: 1; }
-  }
-
-  #screen.boot-in {
-    animation: screenFlicker 1s ease-out;
-  }
-
-  #live-line {
+  .hidden-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: transparent;
+    caret-color: transparent;
+    font-size: 16px; /* stops iOS Safari from auto-zooming on focus */
     opacity: 0;
-    transition: opacity 0.4s ease;
-  }
-
-  #live-line.visible {
-    opacity: 1;
   }
 
   .table-row {
@@ -171,6 +164,7 @@
     <span id="typed-text"></span><span class="cursor blinking" id="cursor"></span>
   </div>
 </div>
+<input id="hidden-input" class="hidden-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="text">
 
 <script>
 const screen = document.getElementById('screen');
@@ -179,13 +173,8 @@ const typedText = document.getElementById('typed-text');
 const boot = document.getElementById('boot');
 const liveLine = document.getElementById('live-line');
 const cursorEl = document.getElementById('cursor');
-
-let blinkTimer = null;
-function holdCursorSolid() {
-  cursorEl.classList.remove('blinking');
-  clearTimeout(blinkTimer);
-  blinkTimer = setTimeout(() => cursorEl.classList.add('blinking'), 1000);
-}
+const hiddenInput = document.getElementById('hidden-input');
+const livePrompt = document.getElementById('live-prompt');
 
 const PROMPT_HTML = `<span class="p-user">guest@padillacastillo</span><span class="p-sep">:</span><span class="p-path">~</span><span class="p-dollar">$</span>`;
 
@@ -243,15 +232,33 @@ Currently studying: AWS SAA-C03`,
   sudo: () => `nice try. permission denied.`,
 };
 
+const CONTACT_API_URL = "https://rc8s3wfo3i.execute-api.us-east-1.amazonaws.com/contact";
+const VISITOR_COUNTER_API_URL = "https://8tg1s8r8f0.execute-api.us-east-1.amazonaws.com/count";
+
 let inputBuffer = "";
 let cmdHistory = [];
 let histIndex = -1;
 let mode = null; // null | 'name' | 'email' | 'message'
 let contactData = {};
-const CONTACT_API_URL = "https://rc8s3wfo3i.execute-api.us-east-1.amazonaws.com/contact";
-const VISITOR_COUNTER_API_URL = "https://8tg1s8r8f0.execute-api.us-east-1.amazonaws.com/count";
+let blinkTimer = null;
 
-const livePrompt = document.getElementById('live-prompt');
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function isValidEmail(str) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str);
+}
+
+function scrollToBottom() {
+  screen.scrollTop = screen.scrollHeight;
+}
+
+function holdCursorSolid() {
+  cursorEl.classList.remove('blinking');
+  clearTimeout(blinkTimer);
+  blinkTimer = setTimeout(() => cursorEl.classList.add('blinking'), 1000);
+}
 
 function updatePrompt() {
   if (mode === 'name') {
@@ -265,6 +272,14 @@ function updatePrompt() {
   }
 }
 
+function printOutput(html) {
+  const outDiv = document.createElement('div');
+  outDiv.className = 'output';
+  outDiv.innerHTML = html;
+  history.appendChild(outDiv);
+  scrollToBottom();
+}
+
 function printLine(cmdText, outputHTML, promptLabel) {
   const promptInner = promptLabel || PROMPT_HTML;
   const cmdDiv = document.createElement('div');
@@ -273,19 +288,10 @@ function printLine(cmdText, outputHTML, promptLabel) {
   history.appendChild(cmdDiv);
 
   if (outputHTML !== null && outputHTML !== undefined) {
-    const outDiv = document.createElement('div');
-    outDiv.className = 'output';
-    outDiv.innerHTML = outputHTML;
-    history.appendChild(outDiv);
+    printOutput(outputHTML);
+  } else {
+    scrollToBottom();
   }
-}
-
-function printOutput(html) {
-  const outDiv = document.createElement('div');
-  outDiv.className = 'output';
-  outDiv.innerHTML = html;
-  history.appendChild(outDiv);
-  screen.scrollTop = screen.scrollHeight;
 }
 
 async function sendContactMessage(data) {
@@ -313,14 +319,6 @@ async function fetchVisitorCount() {
   }
 }
 
-function escapeHtml(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-function isValidEmail(str) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str);
-}
-
 function runCommand(raw) {
   const cmd = raw.trim();
   if (cmd === "") return;
@@ -336,7 +334,6 @@ function runCommand(raw) {
   } else {
     printLine(cmd, `<span class="dim">command not found: ${escapeHtml(cmd)} — type 'help'</span>`);
   }
-  screen.scrollTop = screen.scrollHeight;
 }
 
 function handleEnter(raw) {
@@ -344,14 +341,12 @@ function handleEnter(raw) {
     const val = raw.trim();
     if (val === "") {
       printLine(raw, `<span class="dim">name can't be empty — try again</span>`, "your name >");
-      screen.scrollTop = screen.scrollHeight;
       return;
     }
     contactData.name = val;
     printLine(raw, `got it — what's your email, so I can reply?`, "your name >");
     mode = 'email';
     updatePrompt();
-    screen.scrollTop = screen.scrollHeight;
     return;
   }
 
@@ -359,14 +354,12 @@ function handleEnter(raw) {
     const val = raw.trim();
     if (!isValidEmail(val)) {
       printLine(raw, `<span class="dim">that doesn't look like a valid email — try again</span>`, "your email >");
-      screen.scrollTop = screen.scrollHeight;
       return;
     }
     contactData.email = val;
     printLine(raw, `got it — what's your message?`, "your email >");
     mode = 'message';
     updatePrompt();
-    screen.scrollTop = screen.scrollHeight;
     return;
   }
 
@@ -374,7 +367,6 @@ function handleEnter(raw) {
     const val = raw.trim();
     if (val === "") {
       printLine(raw, `<span class="dim">message can't be empty — try again</span>`, "your message >");
-      screen.scrollTop = screen.scrollHeight;
       return;
     }
     contactData.message = val;
@@ -383,7 +375,6 @@ function handleEnter(raw) {
     mode = null;
     contactData = {};
     updatePrompt();
-    screen.scrollTop = screen.scrollHeight;
     sendContactMessage(toSend);
     return;
   }
@@ -391,12 +382,23 @@ function handleEnter(raw) {
   runCommand(raw);
 }
 
-document.addEventListener('keydown', (e) => {
+// Text entry (typing, backspace, paste, IME, mobile autocomplete) all goes
+// through a real <input> so phones/tablets actually show a keyboard - a
+// bare div can take focus but never triggers an on-screen keyboard.
+hiddenInput.addEventListener('input', () => {
+  holdCursorSolid();
+  inputBuffer = hiddenInput.value;
+  typedText.textContent = inputBuffer;
+  scrollToBottom();
+});
+
+hiddenInput.addEventListener('keydown', (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
 
   holdCursorSolid();
 
   if (e.key === 'Enter') {
+    e.preventDefault();
     const wasCommandMode = (mode === null);
     handleEnter(inputBuffer);
     if (wasCommandMode && inputBuffer.trim() !== "") {
@@ -404,14 +406,13 @@ document.addEventListener('keydown', (e) => {
       histIndex = cmdHistory.length;
     }
     inputBuffer = "";
+    hiddenInput.value = "";
     typedText.textContent = "";
-  } else if (e.key === 'Backspace') {
-    inputBuffer = inputBuffer.slice(0, -1);
-    typedText.textContent = inputBuffer;
   } else if (e.key === 'ArrowUp') {
     if (histIndex > 0) {
       histIndex--;
       inputBuffer = cmdHistory[histIndex] || "";
+      hiddenInput.value = inputBuffer;
       typedText.textContent = inputBuffer;
     }
     e.preventDefault();
@@ -419,17 +420,18 @@ document.addEventListener('keydown', (e) => {
     if (histIndex < cmdHistory.length) {
       histIndex++;
       inputBuffer = cmdHistory[histIndex] || "";
+      hiddenInput.value = inputBuffer;
       typedText.textContent = inputBuffer;
     }
     e.preventDefault();
-  } else if (e.key.length === 1) {
-    inputBuffer += e.key;
-    typedText.textContent = inputBuffer;
   }
-  screen.scrollTop = screen.scrollHeight;
+  scrollToBottom();
 });
 
-// animated boot sequence
+function focusInput() {
+  hiddenInput.focus();
+}
+
 function typeInto(el, str, speed, done) {
   let idx = 0;
   (function step() {
@@ -444,8 +446,8 @@ function typeInto(el, str, speed, done) {
 function revealPrompt() {
   livePrompt.innerHTML = PROMPT_HTML;
   liveLine.classList.add('visible');
-  screen.scrollTop = screen.scrollHeight;
-  screen.focus();
+  scrollToBottom();
+  focusInput();
 
   if (location.hash === '#contact') {
     window.history.replaceState(null, '', location.pathname + location.search);
@@ -460,7 +462,8 @@ function runBootSequence() {
 
 runBootSequence();
 
-screen.addEventListener('click', () => screen.focus());
+screen.addEventListener('click', focusInput);
+screen.addEventListener('touchend', focusInput);
 </script>
 </body>
 </html>
