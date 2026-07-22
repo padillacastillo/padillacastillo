@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="7" fill="#0f172a"/>
-  <text x="16" y="22" font-family="JetBrains Mono, ui-monospace, monospace" font-size="16" font-weight="700" fill="#22c55e" text-anchor="middle">&gt;_</text>
+  <rect width="32" height="32" rx="6" fill="#0c0d0e"/>
+  <path d="M8 9 L16 16 L8 23" fill="none" stroke="#5fd75f" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="19" y="9" width="5" height="14" rx="1" fill="#6cb6ff"/>
 </svg>

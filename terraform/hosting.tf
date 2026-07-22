@@ -63,20 +63,12 @@ resource "aws_cloudfront_origin_access_control" "site" {
   signing_protocol                  = "sigv4"
 }
 
-resource "aws_cloudfront_function" "url_rewrite" {
-  name    = "padillacastillo-url-rewrite"
-  runtime = "cloudfront-js-2.0"
-  comment = "Rewrites directory-style requests (e.g. /resume) to their index.html before hitting the S3 origin."
-  publish = true
-  code    = file("${path.module}/functions/url_rewrite.js")
-}
-
 resource "aws_cloudfront_distribution" "site" {
   enabled             = true
   is_ipv6_enabled     = true
   default_root_object = "index.html"
   aliases             = ["padillacastillo.com"]
-  price_class         = "PriceClass_100" # cheapest tier (North America + Europe) - plenty for a personal resume site
+  price_class         = "PriceClass_100" # cheapest tier (North America + Europe) - plenty for a personal site
 
   origin {
     domain_name              = aws_s3_bucket.site.bucket_regional_domain_name
@@ -90,11 +82,6 @@ resource "aws_cloudfront_distribution" "site" {
     target_origin_id       = "s3-site"
     viewer_protocol_policy = "redirect-to-https"
     cache_policy_id        = "658327ea-f89d-4fab-a63d-7e88639e58f6" # AWS managed "CachingOptimized"
-
-    function_association {
-      event_type   = "viewer-request"
-      function_arn = aws_cloudfront_function.url_rewrite.arn
-    }
   }
 
   restrictions {

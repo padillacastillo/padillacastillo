@@ -1,64 +1,466 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Cristian Padilla Castillo</title>
-  <meta name="description" content="Cristian Padilla Castillo — Computer Science student. Cloud Resume Challenge and real-world project work.">
-  <meta property="og:title" content="Cristian Padilla Castillo">
-  <meta property="og:description" content="Computer Science student.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://padillacastillo.com">
-  <meta name="theme-color" content="#0f172a">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>guest@padillacastillo:~$</title>
+<meta name="description" content="Cristian Padilla Castillo — Computer Science student. Cloud infrastructure and automation.">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<style>
+  @font-face {
+    font-family: 'IBM Plex Mono';
+    src: local('IBM Plex Mono');
+  }
+
+  :root {
+    --bg: #0c0d0e;
+    --fg: #e6e6e6;
+    --muted: #8a8a8a;
+    --faint: #5a5a5a;
+    --accent: #8ab4f8;
+    --error: #c97b7b;
+    --term-user: #5fd75f;
+    --term-path: #6cb6ff;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--bg);
+    font-family: 'IBM Plex Mono', 'JetBrains Mono', Consolas, monospace;
+    overflow: hidden;
+  }
+
+  #screen {
+    height: 100%;
+    padding: 28px 32px;
+    color: var(--fg);
+    font-size: 14.5px;
+    line-height: 1.6;
+    overflow-y: auto;
+  }
+
+  #screen::-webkit-scrollbar { width: 0; }
+
+  .boot {
+    color: var(--faint);
+    white-space: pre-wrap;
+  }
+
+  .prompt-line {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .prompt {
+    color: var(--accent);
+    white-space: nowrap;
+    font-weight: 600;
+    margin-right: 8px;
+  }
+
+  .p-user { color: var(--term-user); }
+  .p-sep, .p-dollar { color: var(--fg); }
+  .p-path { color: var(--term-path); }
+
+  .history-cmd {
+    color: var(--fg);
+  }
+
+  .output {
+    margin: 4px 0 16px 0;
+    white-space: pre-wrap;
+  }
+
+  .output a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-color: var(--faint);
+  }
+
+  .output a:hover {
+    text-decoration-color: var(--accent);
+  }
+
+  .label { color: var(--muted); }
+  .dim { color: var(--error); }
+
+  #input-line {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  #cmd-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--fg);
+    font-family: inherit;
+    font-size: 14.5px;
+    caret-color: transparent;
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 8px;
+    height: 16px;
+    background: var(--accent);
+    vertical-align: text-bottom;
+  }
+
+  .cursor.blinking {
+    animation: blink 1s step-start infinite;
+  }
+
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; } to { opacity: 1; }
+  }
+
+  @keyframes screenFlicker {
+    0%   { opacity: 0; }
+    4%   { opacity: 1; }
+    6%   { opacity: 0.2; }
+    9%   { opacity: 1; }
+    12%  { opacity: 0.4; }
+    16%  { opacity: 1; }
+    35%  { opacity: 0.7; }
+    40%  { opacity: 1; }
+    100% { opacity: 1; }
+  }
+
+  #screen.boot-in {
+    animation: screenFlicker 1s ease-out;
+  }
+
+  #live-line {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  #live-line.visible {
+    opacity: 1;
+  }
+
+  .table-row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 4px 12px;
+  }
+
+  @media (max-width: 560px) {
+    #screen { padding: 18px 16px; font-size: 13px; }
+    .table-row { grid-template-columns: 90px 1fr; }
+  }
+</style>
 </head>
 <body>
-  <main class="wrap">
-    <section>
-      <p class="eyebrow"><span class="prompt">$</span> whoami</p>
-      <h1>Cristian Padilla Castillo</h1>
-      <p class="tagline">Computer Science student</p>
-      <p class="bio">I'm a CS student at CSULB learning cloud infrastructure by building real, deployed projects — from this serverless resume site to a production booking platform for a small business I run.</p>
-    </section>
+<div id="screen" tabindex="0">
+  <div class="boot" id="boot"></div>
+  <div id="history"></div>
+  <div class="prompt-line" id="live-line">
+    <span class="prompt" id="live-prompt"></span>
+    <span id="typed-text"></span><span class="cursor blinking" id="cursor"></span>
+  </div>
+</div>
 
-    <nav class="socials" aria-label="Social links">
-      <a href="https://github.com/padillacastillo" aria-label="GitHub" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58 0-.29-.01-1.04-.02-2.04-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.21.08 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.8 5.63-5.48 5.92.43.37.81 1.1.81 2.22 0 1.6-.02 2.89-.02 3.29 0 .32.22.7.83.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
-      </a>
-      <a href="contact/" aria-label="Contact">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4h20a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm1.4 2L12 12.5 20.6 6H3.4zM3 8.24V18h18V8.24l-8.65 6.74a1 1 0 0 1-1.2 0L3 8.24z"/></svg>
-      </a>
-      <a href="resume/" aria-label="Resume">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm0 2.5L18.5 9H14V4.5zM8 13h8v1.5H8V13zm0 3h8v1.5H8V16zm0-6h4v1.5H8V10z"/></svg>
-      </a>
-    </nav>
+<script>
+const screen = document.getElementById('screen');
+const history = document.getElementById('history');
+const typedText = document.getElementById('typed-text');
+const boot = document.getElementById('boot');
+const liveLine = document.getElementById('live-line');
+const cursorEl = document.getElementById('cursor');
 
-    <section>
-      <h2>Projects</h2>
-      <div class="projects">
-        <a class="project-card" href="https://github.com/padillacastillo/padillacastillo" target="_blank" rel="noopener">
-          <h3>Cloud Resume Website</h3>
-          <p>This site — a serverless resume and landing page with a Lambda-backed visitor counter, all provisioned with Terraform and deployed through GitHub Actions.</p>
-          <div class="tags"><span>AWS</span><span>Terraform</span><span>GitHub Actions</span></div>
-        </a>
-        <a class="project-card" href="https://cpcmobilenotary.com" target="_blank" rel="noopener">
-          <h3>CPC Mobile Notary Booking Platform</h3>
-          <p>A live booking system for a self-owned mobile notary business — S3/CloudFront front end, Lambda + DynamoDB handling submissions, SES/SNS for real-time notifications.</p>
-          <div class="tags"><span>AWS</span><span>Terraform</span><span>GitHub Actions</span></div>
-        </a>
-      </div>
-    </section>
+let blinkTimer = null;
+function holdCursorSolid() {
+  cursorEl.classList.remove('blinking');
+  clearTimeout(blinkTimer);
+  blinkTimer = setTimeout(() => cursorEl.classList.add('blinking'), 1000);
+}
 
-    <footer>
-      <p>Built with Terraform · Hosted on AWS S3 + CloudFront · Source on <a href="https://github.com/padillacastillo/padillacastillo" target="_blank" rel="noopener">GitHub</a></p>
-      <p>Unique visitors: <span id="visitor-count">…</span></p>
-      <p>&copy; 2026 Cristian Padilla Castillo</p>
-    </footer>
-  </main>
-  <script src="js/visitor-counter.js"></script>
+const PROMPT_HTML = `<span class="p-user">guest@padillacastillo</span><span class="p-sep">:</span><span class="p-path">~</span><span class="p-dollar">$</span>`;
+
+const motd =
+`whoami
+projects
+stack
+stats
+contact
+clear
+`;
+
+const commands = {
+  help: () =>
+`whoami
+projects
+stack
+stats
+contact
+clear`,
+
+  whoami: () =>
+`Cristian Padilla Castillo — CS student, expected 2027.
+I build systems around cloud infrastructure and automation —
+tools that remove a step someone used to do by hand.
+Based in Los Angeles.`,
+
+  projects: () =>
+`<div class="table-row"><span class="label">01</span><span>This site — S3 + CloudFront + API Gateway + Lambda
+   + DynamoDB, deployed via GitHub Actions/OIDC.
+   <a href="https://github.com/padillacastillo/padillacastillo" target="_blank" rel="noopener">view repo →</a></span></div>
+
+<div class="table-row"><span class="label">02</span><span>CPC Mobile Notary fee calculator — planned: a booking
+   and fee-calculator tool for a mobile notary business I run.</span></div>`,
+
+  stack: () =>
+`AWS: S3 · CloudFront · API Gateway · Lambda · DynamoDB · SES · Route 53
+IaC: Terraform · GitHub Actions (OIDC)
+Languages: Python · JavaScript
+Currently studying: AWS SAA-C03`,
+
+  stats: () => {
+    fetchVisitorCount();
+    return `checking visitor count…`;
+  },
+
+  clear: () => null,
+
+  contact: () => {
+    mode = 'name';
+    updatePrompt();
+    return `sure — what's your name?`;
+  },
+
+  sudo: () => `nice try. permission denied.`,
+};
+
+let inputBuffer = "";
+let cmdHistory = [];
+let histIndex = -1;
+let mode = null; // null | 'name' | 'email' | 'message'
+let contactData = {};
+const CONTACT_API_URL = "https://rc8s3wfo3i.execute-api.us-east-1.amazonaws.com/contact";
+const VISITOR_COUNTER_API_URL = "https://8tg1s8r8f0.execute-api.us-east-1.amazonaws.com/count";
+
+const livePrompt = document.getElementById('live-prompt');
+
+function updatePrompt() {
+  if (mode === 'name') {
+    livePrompt.textContent = "your name >";
+  } else if (mode === 'email') {
+    livePrompt.textContent = "your email >";
+  } else if (mode === 'message') {
+    livePrompt.textContent = "your message >";
+  } else {
+    livePrompt.innerHTML = PROMPT_HTML;
+  }
+}
+
+function printLine(cmdText, outputHTML, promptLabel) {
+  const promptInner = promptLabel || PROMPT_HTML;
+  const cmdDiv = document.createElement('div');
+  cmdDiv.className = 'prompt-line';
+  cmdDiv.innerHTML = `<span class="prompt">${promptInner}</span><span class="history-cmd">${escapeHtml(cmdText)}</span>`;
+  history.appendChild(cmdDiv);
+
+  if (outputHTML !== null && outputHTML !== undefined) {
+    const outDiv = document.createElement('div');
+    outDiv.className = 'output';
+    outDiv.innerHTML = outputHTML;
+    history.appendChild(outDiv);
+  }
+}
+
+function printOutput(html) {
+  const outDiv = document.createElement('div');
+  outDiv.className = 'output';
+  outDiv.innerHTML = html;
+  history.appendChild(outDiv);
+  screen.scrollTop = screen.scrollHeight;
+}
+
+async function sendContactMessage(data) {
+  try {
+    const response = await fetch(CONTACT_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: data.name, email: data.email, message: data.message, company: "" }),
+    });
+    if (!response.ok) throw new Error("request failed");
+    printOutput(`message sent — thanks, I'll get back to you.`);
+  } catch (err) {
+    printOutput(`<span class="dim">something went wrong sending that — try again, or reach out on GitHub.</span>`);
+  }
+}
+
+async function fetchVisitorCount() {
+  try {
+    const response = await fetch(VISITOR_COUNTER_API_URL);
+    if (!response.ok) throw new Error("request failed");
+    const data = await response.json();
+    printOutput(`${data.count} unique visitors so far.`);
+  } catch (err) {
+    printOutput(`<span class="dim">couldn't reach the counter — try again later.</span>`);
+  }
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function isValidEmail(str) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str);
+}
+
+function runCommand(raw) {
+  const cmd = raw.trim();
+  if (cmd === "") return;
+
+  if (cmd === "clear") {
+    history.innerHTML = "";
+    return;
+  }
+
+  const fn = commands[cmd.toLowerCase()];
+  if (fn) {
+    printLine(cmd, fn());
+  } else {
+    printLine(cmd, `<span class="dim">command not found: ${escapeHtml(cmd)} — type 'help'</span>`);
+  }
+  screen.scrollTop = screen.scrollHeight;
+}
+
+function handleEnter(raw) {
+  if (mode === 'name') {
+    const val = raw.trim();
+    if (val === "") {
+      printLine(raw, `<span class="dim">name can't be empty — try again</span>`, "your name >");
+      screen.scrollTop = screen.scrollHeight;
+      return;
+    }
+    contactData.name = val;
+    printLine(raw, `got it — what's your email, so I can reply?`, "your name >");
+    mode = 'email';
+    updatePrompt();
+    screen.scrollTop = screen.scrollHeight;
+    return;
+  }
+
+  if (mode === 'email') {
+    const val = raw.trim();
+    if (!isValidEmail(val)) {
+      printLine(raw, `<span class="dim">that doesn't look like a valid email — try again</span>`, "your email >");
+      screen.scrollTop = screen.scrollHeight;
+      return;
+    }
+    contactData.email = val;
+    printLine(raw, `got it — what's your message?`, "your email >");
+    mode = 'message';
+    updatePrompt();
+    screen.scrollTop = screen.scrollHeight;
+    return;
+  }
+
+  if (mode === 'message') {
+    const val = raw.trim();
+    if (val === "") {
+      printLine(raw, `<span class="dim">message can't be empty — try again</span>`, "your message >");
+      screen.scrollTop = screen.scrollHeight;
+      return;
+    }
+    contactData.message = val;
+    printLine(raw, `sending…`, "your message >");
+    const toSend = contactData;
+    mode = null;
+    contactData = {};
+    updatePrompt();
+    screen.scrollTop = screen.scrollHeight;
+    sendContactMessage(toSend);
+    return;
+  }
+
+  runCommand(raw);
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+  holdCursorSolid();
+
+  if (e.key === 'Enter') {
+    const wasCommandMode = (mode === null);
+    handleEnter(inputBuffer);
+    if (wasCommandMode && inputBuffer.trim() !== "") {
+      cmdHistory.push(inputBuffer);
+      histIndex = cmdHistory.length;
+    }
+    inputBuffer = "";
+    typedText.textContent = "";
+  } else if (e.key === 'Backspace') {
+    inputBuffer = inputBuffer.slice(0, -1);
+    typedText.textContent = inputBuffer;
+  } else if (e.key === 'ArrowUp') {
+    if (histIndex > 0) {
+      histIndex--;
+      inputBuffer = cmdHistory[histIndex] || "";
+      typedText.textContent = inputBuffer;
+    }
+    e.preventDefault();
+  } else if (e.key === 'ArrowDown') {
+    if (histIndex < cmdHistory.length) {
+      histIndex++;
+      inputBuffer = cmdHistory[histIndex] || "";
+      typedText.textContent = inputBuffer;
+    }
+    e.preventDefault();
+  } else if (e.key.length === 1) {
+    inputBuffer += e.key;
+    typedText.textContent = inputBuffer;
+  }
+  screen.scrollTop = screen.scrollHeight;
+});
+
+// animated boot sequence
+function typeInto(el, str, speed, done) {
+  let idx = 0;
+  (function step() {
+    if (idx <= str.length) {
+      el.textContent = str.slice(0, idx);
+      idx += 1;
+      setTimeout(step, speed);
+    } else if (done) setTimeout(done, 400);
+  })();
+}
+
+function revealPrompt() {
+  livePrompt.innerHTML = PROMPT_HTML;
+  liveLine.classList.add('visible');
+  screen.scrollTop = screen.scrollHeight;
+  screen.focus();
+
+  if (location.hash === '#contact') {
+    window.history.replaceState(null, '', location.pathname + location.search);
+    runCommand('contact');
+  }
+}
+
+function runBootSequence() {
+  screen.classList.add('boot-in');
+  setTimeout(() => typeInto(boot, motd, 35, revealPrompt), 650);
+}
+
+runBootSequence();
+
+screen.addEventListener('click', () => screen.focus());
+</script>
 </body>
 </html>

@@ -134,7 +134,7 @@ resource "aws_apigatewayv2_stage" "visitor_counter" {
   name        = "$default"
   auto_deploy = true
 
-  # Personal resume site - a low ceiling is plenty and blunts a bot flood
+  # Personal site - a low ceiling is plenty and blunts a bot flood
   # from inflating the count.
   default_route_settings {
     throttling_burst_limit = 10
@@ -151,6 +151,6 @@ resource "aws_lambda_permission" "visitor_counter_apigw" {
 }
 
 output "visitor_counter_api_url" {
-  description = "Paste this into site/js/visitor-counter.js as VISITOR_COUNTER_API_URL, then append /count"
+  description = "Paste this into site/index.html as VISITOR_COUNTER_API_URL, then append /count"
   value       = aws_apigatewayv2_stage.visitor_counter.invoke_url
 }

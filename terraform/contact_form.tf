@@ -117,6 +117,6 @@ resource "aws_lambda_permission" "contact_form_apigw" {
 }
 
 output "contact_form_api_url" {
-  description = "Paste this into site/js/contact.js as CONTACT_API_URL, then append /contact"
+  description = "Paste this into site/index.html as CONTACT_API_URL, then append /contact"
   value       = aws_apigatewayv2_stage.contact_form.invoke_url
 }
